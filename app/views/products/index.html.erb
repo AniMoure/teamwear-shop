@@ -1,0 +1,7 @@
+<h1 class="mb-8 text-center text-2xl font-bold">Catalog</h1>
+
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <% @products.each do |product| %>
+    <%= render ProductCardComponent.new(product: product) %>
+  <% end %>
+</div>
