@@ -20,3 +20,19 @@ Log of the choices made on this project.
 **What I did**: a Product with a name and a price, validated, with the specs written first.
 
 **What I chose not to do**: store the price as a decimal number. Computers do not represent decimals exactly (0.1 + 0.2 gives 0.30000000000000004), which gives wrong results with money. The price is stored in cents as an integer, which is also the unit Stripe expects.
+
+## Step 3: Catalog page and ProductCard component
+
+**Problem**: show the products to visitors on a catalog page.
+
+**What I did**:
+
+1. A catalog page listing the products, with each product displayed by a ViewComponent (`ProductCardComponent`). I used ViewComponent instead of a partial because it is part of the target stack, so I wanted to practice with it.
+
+2. I wrote the component spec first (TDD): I described what the component should display before implementing it. The spec tells me when it works, and lets me change it later without breaking what it shows.
+
+3. The price is formatted with Rails' `number_to_currency`, called through `helpers`, since a component does not have access to view helpers by default.
+
+**What I chose not to do**:
+- Format the price by hand: Rails already handles separators and rounding.
+- Pagination, filtering and product images: the page only needs to list products for now.
