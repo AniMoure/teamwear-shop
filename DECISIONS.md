@@ -1,6 +1,6 @@
 # Decisions
 
-Short log of the choices made on this project, what I chose not to do, and why.
+Log of the choices made on this project.
 
 ## Step 1: Project setup
 
