@@ -36,9 +36,6 @@ Log of the choices made on this project.
 **What I chose not to do**:
 - Format the price by hand: Rails already handles separators and rounding.
 - Pagination, filtering and product images: the page only needs to list products for now.
-
-## Step 4: Cart and CartItem models
-
 ## Step 4: Cart and CartItem models
 
 **Problem**: visitors need a cart to hold the products they want to buy.
@@ -52,3 +49,21 @@ The quantity can never be empty in the database (`null: false`).
 **What I chose not to do**:
 - Store the cart in the session: it is lost when the session ends, and it cannot be queried. With the cart in the database I can run queries on it and debug a problem afterwards.
 - Add the "Add to cart" button, Turbo and Stimulus: they come in the next PRs, to keep this one small.
+
+## Step 5: Add a product to the cart
+
+**Problem**:
+Visitors need to add a product to their cart, and adding the same product again should increase its quantity.
+
+**What I did**:
+`Cart#add_item(product)` looks for the product's line in the cart; if it exists, its quantity goes up by one, otherwise a new line is created with a quantity of one.
+
+Two requests can arrive at the same time (a double click): both see no line, and the second insert is refused by the uniqueness validation or the unique index. In that case `add_item` retries once: the second lookup finds the line and increments it. If it fails again, the error is raised instead of looping forever.
+
+`Cart#total_cents` now loads the products together with the lines (`includes(:product)`), so computing the total runs two queries instead of one query per line.
+
+**What I chose not to do**:
+- Use `find_or_initialize_by` instead of `find_by`. It always returns an object, so I would need an extra check `(new_record?)` to know whether the line is new; `find_by` returns `nil` when there is no line, which keeps the condition simple.
+- Lock the cart row (`cart.with_lock`) to serialize requests: it would work, but it blocks every request on the cart, while the retry only costs something in the rare case of a collision.
+- Use `upsert` with `ON CONFLICT ... quantity + 1`: a single query, but it skips validations and callbacks, and is harder to read for a first version.
+
