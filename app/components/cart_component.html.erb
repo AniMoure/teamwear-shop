@@ -1,0 +1,41 @@
+<section id="cart" class="mx-auto max-w-3xl">
+  <% if items.empty? %>
+    <div class="rounded-xl border border-gray-200 bg-white p-10 text-center">
+      <p class="text-gray-700">Your cart is empty.</p>
+      <%= link_to "Browse our catalog", helpers.root_path, class: "mt-4 inline-block font-medium text-gray-900 underline" %>
+    </div>
+  <% else %>
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <% items.each do |item| %>
+        <div id="<%= dom_id(item) %>" class="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 p-4 last:border-b-0">
+          <div class="min-w-40 flex-1">
+            <p class="font-semibold text-gray-900"><%= item.product.name %></p>
+            <p class="text-sm text-gray-500"><%= price(item.product.price_cents) %></p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <%= button_to "−", helpers.decrement_cart_item_path(item), method: :patch,
+                  aria: { label: "Decrease quantity of #{item.product.name}" },
+                  class: "h-8 w-8 cursor-pointer rounded-lg border border-gray-300 hover:bg-gray-100" %>
+            <span data-quantity class="w-8 text-center font-medium"><%= item.quantity %></span>
+            <%= button_to "+", helpers.increment_cart_item_path(item), method: :patch,
+                  aria: { label: "Increase quantity of #{item.product.name}" },
+                  class: "h-8 w-8 cursor-pointer rounded-lg border border-gray-300 hover:bg-gray-100" %>
+          </div>
+
+          <p class="w-24 text-right font-semibold text-gray-900"><%= price(item.total_cents) %></p>
+
+          <%= button_to "Remove", helpers.cart_item_path(item), method: :delete,
+                class: "cursor-pointer text-sm text-red-600 hover:underline" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+      <%= link_to "Browse our catalog", helpers.root_path, class: "font-medium text-gray-900 underline" %>
+      <p id="cart_total" class="text-xl font-bold text-gray-900">
+        Total: <%= price(@cart.total_cents) %>
+      </p>
+    </div>
+  <% end %>
+</section>

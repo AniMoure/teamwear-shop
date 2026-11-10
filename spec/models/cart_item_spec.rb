@@ -27,4 +27,26 @@ RSpec.describe CartItem, type: :model do
 
     expect { duplicate.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
   end
+
+  describe "#decrease!" do
+    it "lowers the quantity by one" do
+      item = CartItem.create!(cart: cart, product: product, quantity: 2)
+
+      item.decrease!
+
+      expect(item.reload.quantity).to eq(1)
+    end
+
+    it "removes the line when the quantity was one" do
+      item = CartItem.create!(cart: cart, product: product, quantity: 1)
+
+      expect { item.decrease! }.to change(CartItem, :count).by(-1)
+    end
+  end
+
+  it "computes its total from the product price and the quantity" do
+    item = CartItem.new(cart: cart, product: product, quantity: 3)
+
+    expect(item.total_cents).to eq(13_500)
+  end
 end

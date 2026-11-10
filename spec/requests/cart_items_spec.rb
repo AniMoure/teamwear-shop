@@ -51,4 +51,75 @@ RSpec.describe "Cart items", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "changing a line of the cart" do
+    let(:item) { Cart.last.cart_items.find_by(product: jersey) }
+
+    before { post cart_items_path(product_id: jersey.id) }
+
+    it "increases the quantity with PATCH /cart_items/:id/increment" do
+      patch increment_cart_item_path(item)
+
+      expect(item.reload.quantity).to eq(2)
+      expect(response).to redirect_to(cart_path)
+    end
+
+    it "decreases the quantity with PATCH /cart_items/:id/decrement" do
+      item.update!(quantity: 3)
+
+      patch decrement_cart_item_path(item)
+
+      expect(item.reload.quantity).to eq(2)
+      expect(response).to redirect_to(cart_path)
+    end
+
+    it "removes the line when decreasing a quantity of one" do
+      patch decrement_cart_item_path(item)
+
+      expect(CartItem.exists?(item.id)).to be(false)
+    end
+
+    it "removes the line with DELETE /cart_items/:id" do
+      item.update!(quantity: 3)
+
+      delete cart_item_path(item)
+
+      expect(CartItem.exists?(item.id)).to be(false)
+      expect(response).to redirect_to(cart_path)
+    end
+
+    it "updates the cart and the counter with a Turbo Stream" do
+      patch increment_cart_item_path(item), as: :turbo_stream
+
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include('<turbo-stream action="replace" target="cart">')
+      expect(response.body).to include('<turbo-stream action="replace" target="cart_counter">')
+      expect(response.body).to include("Cart (2)")
+    end
+
+    it "shows the empty cart after removing the last line" do
+      delete cart_item_path(item), as: :turbo_stream
+
+      expect(response.body).to include("Your cart is empty")
+      expect(response.body).to include("Cart (0)")
+    end
+
+    it "cannot change a line of another visitor's cart" do
+      other_item = CartItem.create!(cart: Cart.create!, product: jersey, quantity: 1)
+
+      delete cart_item_path(other_item)
+
+      expect(response).to have_http_status(:not_found)
+      expect(CartItem.exists?(other_item.id)).to be(true)
+    end
+  end
+
+  it "returns 404 when the visitor has no cart yet" do
+    other_item = CartItem.create!(cart: Cart.create!, product: jersey, quantity: 1)
+
+    patch increment_cart_item_path(other_item)
+
+    expect(response).to have_http_status(:not_found)
+    expect(other_item.reload.quantity).to eq(1)
+  end
 end
