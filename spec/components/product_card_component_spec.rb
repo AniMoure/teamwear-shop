@@ -11,4 +11,14 @@ RSpec.describe ProductCardComponent, type: :component do
     expect(rendered_content).to include("Home jersey")
     expect(rendered_content).to include("45,00 €")
   end
+
+  it "has an Add to cart button that posts the product" do
+    product = Product.create!(name: "Home jersey", price_cents: 4500)
+
+    html = render_inline(described_class.new(product: product))
+
+    form = html.css("form[action='/cart_items?product_id=#{product.id}'][method='post']")
+    expect(form).to be_present
+    expect(form.css("button").text).to eq("Add to cart")
+  end
 end
