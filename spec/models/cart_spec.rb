@@ -15,6 +15,22 @@ RSpec.describe Cart, type: :model do
     expect(cart.total_cents).to eq(11_900)
   end
 
+  describe "#items_count" do
+    it "adds up the quantities of all lines" do
+      cart = Cart.create!
+      jersey = Product.create!(name: "Home jersey", price_cents: 4500)
+      shorts = Product.create!(name: "Training shorts", price_cents: 2900)
+      CartItem.create!(cart: cart, product: jersey, quantity: 2)
+      CartItem.create!(cart: cart, product: shorts, quantity: 1)
+
+      expect(cart.items_count).to eq(3)
+    end
+
+    it "is zero for an empty cart" do
+      expect(Cart.create!.items_count).to eq(0)
+    end
+  end
+
   describe "#add_item" do
     let(:cart) { Cart.create! }
     let(:jersey) { Product.create!(name: "Home jersey", price_cents: 4500) }

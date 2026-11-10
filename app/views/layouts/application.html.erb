@@ -24,7 +24,15 @@
   </head>
 
   <body>
+    <header class="border-b border-gray-200 bg-white">
+      <nav class="container mx-auto flex items-center justify-between px-5 py-4">
+        <%= link_to "Teamwear Shop", root_path, class: "text-lg font-bold text-gray-900" %>
+        <%= render CartCounterComponent.new(count: cart_items_count) %>
+      </nav>
+    </header>
+
     <main class="container mx-auto mt-12 px-5">
+      <p id="flash" class="mb-6 text-center text-sm font-medium text-green-700"><%= notice %></p>
       <%= yield %>
     </main>
   </body>

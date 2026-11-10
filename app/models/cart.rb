@@ -4,6 +4,10 @@ class Cart < ApplicationRecord
     cart_items.includes(:product).sum { |item| item.product.price_cents * item.quantity }
   end
 
+  def items_count
+    cart_items.sum(:quantity)
+  end
+
   def add_item(product)
     retried = false
 
