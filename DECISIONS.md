@@ -103,3 +103,24 @@ After adding products, visitors could not see what was in their cart, change a q
 - Replace only the changed row with Turbo: replacing the whole cart section also updates the total and the empty state, with one stream instead of three and fewer cases to get wrong. The cart is small, so re-rendering it costs nothing noticeable.
 - A quantity input field: buttons are enough for a teamwear cart and need no validation of what the user types.
 - Checkout and payment: out of scope for this step.
+
+## Step 8: Checkout, turn the cart into an order
+
+**Problem**:
+Visitors could fill a cart but not order it: the shop's main flow stopped halfway.
+
+**What I did**:
+- A "Checkout" button on the cart page leads to a checkout page (`/orders/new`) with the order summary and a form asking for a name and an email. The email is cleaned up before saving (spaces removed, lowercase).
+- `Order.place(cart:, customer_name:, email:)` creates an `Order` with one `OrderItem` per cart line, then deletes the cart, all in one database transaction: either everything is saved, or nothing is.
+- Each `OrderItem` copies the product name and unit price at the moment of the order, and the order stores its total. Changing or deleting a product later does not change past orders (the link to the product becomes empty instead of breaking).
+- Double submit: the cart row is locked (`lock!`) at the start of the transaction. A second submit of the same cart waits, then finds the cart deleted and is redirected to the cart page instead of creating a second order. The button also changes to "Placing order…" while the form is sent.
+- If the form is invalid, the checkout page is shown again with the errors (status 422, which Turbo needs to display it) and the cart is kept.
+- After the order, the cart id is removed from the session, so the header shows "Cart (0)", and the visitor sees a confirmation page with the order number (`TW-000001`), the lines and the total.
+- The confirmation URL uses a random token (`/orders/LGhZDj...`) instead of the id, so nobody can read someone else's order (name, email) by trying `/orders/1`, `/orders/2`...
+
+**What I chose not to do**:
+- Payment: the order is placed without paying. Stripe in test mode can come in its own PR; prices are already in cents, the unit Stripe expects.
+- A confirmation email: it needs a mailer and a background job (GoodJob), better in a separate step.
+- Customer accounts and login: a name and an email are enough for team orders.
+- Compute the order total from the products each time: prices change, so the order must keep what the customer actually paid.
+- Use a component for the order summary: it is a small partial shared by two views of the same controller, so a partial is enough.

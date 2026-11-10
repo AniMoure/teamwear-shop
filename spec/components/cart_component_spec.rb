@@ -43,4 +43,19 @@ RSpec.describe CartComponent, type: :component do
 
     expect(html.css("#cart a[href='/']").text).to eq("Browse our catalog")
   end
+
+  it "has a checkout link when the cart has products" do
+    cart = Cart.create!
+    CartItem.create!(cart: cart, product: Product.create!(name: "Home jersey", price_cents: 4500), quantity: 1)
+
+    html = render_inline(described_class.new(cart: cart))
+
+    expect(html.css("#cart a[href='/orders/new']").text).to eq("Checkout")
+  end
+
+  it "has no checkout link when the cart is empty" do
+    html = render_inline(described_class.new(cart: Cart.new))
+
+    expect(html.css("#cart a[href='/orders/new']")).to be_empty
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_105729) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_174751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -30,6 +30,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_105729) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "product_id"
+    t.string "product_name", null: false
+    t.integer "unit_price_cents", null: false
+    t.integer "quantity", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "customer_name", null: false
+    t.string "email", null: false
+    t.integer "total_cents", null: false
+    t.string "token", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_orders_on_token", unique: true
+  end
+
   create_table "products", force: :cascade do |t|
     t.string "name"
     t.integer "price_cents"
@@ -39,4 +61,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_105729) do
 
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "products"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products", on_delete: :nullify
 end
