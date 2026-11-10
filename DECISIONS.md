@@ -67,3 +67,20 @@ Two requests can arrive at the same time (a double click): both see no line, and
 - Lock the cart row (`cart.with_lock`) to serialize requests: it would work, but it blocks every request on the cart, while the retry only costs something in the rare case of a collision.
 - Use `upsert` with `ON CONFLICT ... quantity + 1`: a single query, but it skips validations and callbacks, and is harder to read for a first version.
 
+## Step 6: Add to cart button with Turbo
+
+**Problem**:
+Visitors need a button to add a product to their cart from the catalog, and they should see the cart change without reloading the page.
+
+**What I did**:
+- Each product card has an "Add to cart" button (`button_to`) that posts to `CartItemsController#create`, which calls `Cart#add_item`.
+- The visitor's cart is found through a `CurrentCart` concern: the session only stores the cart id, and the cart itself lives in the database. A cart is created the first time a product is added. If the cart in the session no longer exists, a new one is created.
+- The header shows a cart counter (`CartCounterComponent`). The layout reads the count without creating a cart, so a visitor who only browses does not create an empty cart in the database.
+- Turbo submits the form and asks for a Turbo Stream response: the controller replaces the counter and updates the flash message, so only those two parts of the page change. Without JavaScript, the same action redirects to the catalog with a notice.
+- An unknown product returns a 404.
+
+**What I chose not to do**:
+- Write JavaScript or a Stimulus controller: Turbo Streams update the page from the server, with no custom JavaScript.
+- Create a cart for every visitor on their first page view: it would fill the database with empty carts.
+- Add Capybara for the component specs: `render_inline` returns an HTML fragment that I can query with CSS selectors, which is enough here.
+- A cart page, removing items and changing the quantity: not needed to show the add-to-cart flow, they can come later.
