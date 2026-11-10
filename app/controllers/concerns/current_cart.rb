@@ -18,6 +18,11 @@ module CurrentCart
     find_cart_from_session&.items_count || 0
   end
 
+  # For actions on an existing cart: a visitor without a cart gets a 404.
+  def cart_from_session!
+    find_cart_from_session || raise(ActiveRecord::RecordNotFound)
+  end
+
   def find_cart_from_session
     Cart.find_by(id: session[:cart_id]) if session[:cart_id]
   end

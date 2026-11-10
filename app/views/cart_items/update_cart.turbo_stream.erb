@@ -1,0 +1,2 @@
+<%= turbo_stream.replace "cart", CartComponent.new(cart: @cart) %>
+<%= turbo_stream.replace "cart_counter", CartCounterComponent.new(count: @cart.items_count) %>

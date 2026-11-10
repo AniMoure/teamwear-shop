@@ -84,3 +84,22 @@ Visitors need a button to add a product to their cart from the catalog, and they
 - Create a cart for every visitor on their first page view: it would fill the database with empty carts.
 - Add Capybara for the component specs: `render_inline` returns an HTML fragment that I can query with CSS selectors, which is enough here.
 - A cart page, removing items and changing the quantity: not needed to show the add-to-cart flow, they can come later.
+
+## Step 7: View the cart page and added " + / − " and "remove" buttons
+
+**Problem**:
+After adding products, visitors could not see what was in their cart, change a quantity or remove a product.
+
+**What I did**:
+- A cart page (`/cart`) lists each line with the product name, unit price, quantity and line total, then the cart total, with a "Browse our catalog" link next to it so visitors can go back to shopping. The header counter now links to the cart page. An empty cart shows a message and a link back to the catalog, and visiting the page does not create a cart in the database.
+- Each line has three buttons: "+" (`PATCH /cart_items/:id/increment`), "−" (`PATCH /cart_items/:id/decrement`) and "Remove" (`DELETE /cart_items/:id`). "−" on a quantity of one removes the line (`CartItem#decrease!`).
+- Lines are always looked up through the visitor's own cart (`cart_from_session!.cart_items.find`), so changing the id in the URL to target someone else's line gives a 404 instead of modifying it.
+- With Turbo, each button gets a Turbo Stream that replaces the whole cart section (`CartComponent`) and the header counter. Without Turbo, it redirects to the cart page.
+- The price formatting moved to a `format_price` helper, shared by the product card and the cart, instead of being copied.
+- `CartItem#total_cents` computes a line total, and `Cart#total_cents` now adds up those line totals.
+
+**What I chose not to do**:
+- Send the new quantity from the browser (`PATCH` with `quantity: 3`): with a double click, both requests would send the same number and one click would be lost. The `increment` / `decrement` actions change the quantity relative to what is in the database.
+- Replace only the changed row with Turbo: replacing the whole cart section also updates the total and the empty state, with one stream instead of three and fewer cases to get wrong. The cart is small, so re-rendering it costs nothing noticeable.
+- A quantity input field: buttons are enough for a teamwear cart and need no validation of what the user types.
+- Checkout and payment: out of scope for this step.

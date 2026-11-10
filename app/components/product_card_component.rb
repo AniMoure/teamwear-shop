@@ -6,6 +6,6 @@ class ProductCardComponent < ViewComponent::Base
   end
 
   def formatted_price
-    helpers.number_to_currency(@product.price_cents.to_d / 100, unit: "€", separator: ",", delimiter: " ", format: "%n %u")
+    helpers.format_price(@product.price_cents)
   end
 end
