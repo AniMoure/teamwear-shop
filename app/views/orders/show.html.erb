@@ -1,0 +1,15 @@
+<div class="mx-auto max-w-3xl">
+  <h1 class="mb-2 text-center text-2xl font-bold">Thank you, <%= @order.customer_name %>!</h1>
+  <p class="mb-8 text-center text-gray-600">
+    Your order <span class="font-semibold text-gray-900"><%= @order.number %></span> has been placed.
+    We will contact you at <%= @order.email %>.
+  </p>
+
+  <%= render "summary",
+        lines: @order.order_items.order(:id).map { |item| [ item.product_name, item.quantity, item.total_cents ] },
+        total_cents: @order.total_cents %>
+
+  <p class="mt-8 text-center">
+    <%= link_to "Browse our catalog", root_path, class: "font-medium text-gray-900 underline" %>
+  </p>
+</div>

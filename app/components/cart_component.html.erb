@@ -33,9 +33,13 @@
 
     <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
       <%= link_to "Browse our catalog", helpers.root_path, class: "font-medium text-gray-900 underline" %>
-      <p id="cart_total" class="text-xl font-bold text-gray-900">
-        Total: <%= price(@cart.total_cents) %>
-      </p>
+      <div class="flex items-center gap-4">
+        <p id="cart_total" class="text-xl font-bold text-gray-900">
+          Total: <%= price(@cart.total_cents) %>
+        </p>
+        <%= link_to "Checkout", helpers.new_order_path,
+              class: "rounded-lg bg-gray-900 px-5 py-2 font-medium text-white hover:bg-gray-700" %>
+      </div>
     </div>
   <% end %>
 </section>
