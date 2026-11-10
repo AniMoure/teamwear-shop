@@ -36,3 +36,19 @@ Log of the choices made on this project.
 **What I chose not to do**:
 - Format the price by hand: Rails already handles separators and rounding.
 - Pagination, filtering and product images: the page only needs to list products for now.
+
+## Step 4: Cart and CartItem models
+
+## Step 4: Cart and CartItem models
+
+**Problem**: visitors need a cart to hold the products they want to buy.
+
+**What I did**: `Cart` holds the cart, and `CartItem` links a cart to a product with a quantity (a whole number greater than zero, one by default).
+A cart can hold a given product only once: trying to add it a second time is refused.
+Increasing the quantity of an existing line comes with the "Add to cart" button, in the next PR.
+This is enforced twice: by a validation, which gives a clear error, and by a unique index in the database, which also protects against two requests arriving at the same time.
+The quantity can never be empty in the database (`null: false`).
+
+**What I chose not to do**:
+- Store the cart in the session: it is lost when the session ends, and it cannot be queried. With the cart in the database I can run queries on it and debug a problem afterwards.
+- Add the "Add to cart" button, Turbo and Stimulus: they come in the next PRs, to keep this one small.
