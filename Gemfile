@@ -57,4 +57,4 @@ end
 
 gem "rspec-rails", "~> 8.1", groups: [ :development, :test ]
 
-gem "view_component", "~> 4.23"
+gem "view_component", "~> 4.24"
